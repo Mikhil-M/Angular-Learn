@@ -1,11 +1,7 @@
-<app-header (headerEvent)="currentTab = $event"></app-header>
+<app-header></app-header>
 <div class="container">
   <div class="row">
     <div class="col-md-12">
-      <!-- <app-recipe *ngIf="currentTab == 'recipes'; else shopping"></app-recipe>
-      <ng-template #shopping>
-        <app-shopping-list></app-shopping-list>
-      </ng-template>       -->
       <router-outlet></router-outlet>
     </div>
   </div>

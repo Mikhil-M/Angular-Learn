@@ -7,7 +7,7 @@ import { ShoppingListService } from '../shopping-list/shopping-list.service';
 export class RecipeService {
     public recipeSelected = new EventEmitter<Recipe>();
     private recipes: Recipe[] = [
-        new Recipe(
+        new Recipe(            
             'The test item',
             'This is simply a test',
             'https://cdn.pixabay.com/photo/2016/06/15/19/09/food-1459693_960_720.jpg',
@@ -15,7 +15,7 @@ export class RecipeService {
                 new Ingredient('Meat',1),
                 new Ingredient('Frech Fries',30)
             ]),            
-        new Recipe(
+        new Recipe(            
             'The another test item',
             'This is simply a test',
             'https://cdn.pixabay.com/photo/2016/06/15/19/09/food-1459693_960_720.jpg',
@@ -29,6 +29,11 @@ export class RecipeService {
     
     getRecipes(){
         return this.recipes.slice(); // It will return a copy, otherwise it will be reference to the same array
+    }
+
+    getRecipe(id:number){
+        // let recipe = this.recipes.find( (recipe:Recipe) => { return recipe.id === id;});
+        return this.recipes[id];
     }
 
     addItemsToShoppingList(ingredients: Ingredient[]){
