@@ -1,19 +1,34 @@
-import { Component } from "@angular/core";
+import {
+  Component,
+  ComponentFactoryResolver,
+  ViewChild,
+  ViewContainerRef,
+  OnDestroy,
+} from "@angular/core";
 import { NgForm } from "@angular/forms";
 import { AuthService, AuthResponseData } from "./auth.service";
-import { Observable } from "rxjs";
-import { Router } from '@angular/router';
+import { Observable, Subscription } from "rxjs";
+import { Router } from "@angular/router";
+import { AlertComponent } from "../shared/alert/alert.component";
+import { PlaceHolderDirective } from "../shared/placeholder/placeholder.directive";
 
 @Component({
   selector: "app-auth",
   templateUrl: "./auth.component.html",
 })
-export class AuthComponent {
+export class AuthComponent implements OnDestroy{
   isLoginMode = true;
   isLoading = false;
   error: string = null;
+  @ViewChild(PlaceHolderDirective, { static: false })
+  alertHost: PlaceHolderDirective;
+  closeSub: Subscription;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private componentFactoryResolver: ComponentFactoryResolver
+  ) {}
 
   onSwitchingMode() {
     this.isLoginMode = !this.isLoginMode;
@@ -30,22 +45,48 @@ export class AuthComponent {
     if (this.isLoginMode) {
       authObs = this.authService.login(email, password);
     } else {
-      authObs = this.authService.signup(email, password)
+      authObs = this.authService.signup(email, password);
     }
 
     authObs.subscribe(
       (resData) => {
         console.log(resData);
         this.isLoading = false;
-        this.router.navigate(['/recipes']);
+        this.router.navigate(["/recipes"]);
       },
       (errorMessage) => {
         console.log(errorMessage);
         this.error = errorMessage;
+        this.showErrorAlert(errorMessage);
         this.isLoading = false;
       }
     );
 
     form.reset();
+  }
+
+  onHandleError() {
+    this.error = null;
+  }
+
+  ngOnDestroy(){
+    if(this.closeSub){
+      this.closeSub.unsubscribe();
+    }
+  }
+
+  showErrorAlert(message: string) {
+    const alertCmpFactory = this.componentFactoryResolver.resolveComponentFactory(
+      AlertComponent
+    );
+
+    const hostComponentRef = this.alertHost.viewContainerRef;
+    hostComponentRef.clear();
+    const componentRef = hostComponentRef.createComponent(alertCmpFactory);
+    componentRef.instance.message = message;
+    this.closeSub = componentRef.instance.close.subscribe(()=>{
+      this.closeSub.unsubscribe();
+      hostComponentRef.clear();
+    });
   }
 }
